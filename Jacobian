@@ -1,0 +1,64 @@
+import numpy as np
+
+# function 'f' that will be passed into 'Jacobian'
+# defines the functions and allows more inputs '**params'
+def f(t, x, **params):
+
+    # for functions of t:time and x: other natural variables (P,V,T,v,a,etc.)
+
+    # extra parameters that can be entered into multivariable functions
+    # must be defined when calling function
+    a = params['a']
+    b = params['b']
+
+    # Multivariable functions - these will chane based on the problem
+    f1 = (x[0]**3) -3*x[0]*(x[1]**2) - x[1] + 18
+    f2 = (x[0]**2) -4*(x[0]**2)*x[1] + (x[1]**3) - 2*(x[1]**2) + 28
+
+    # return vector of functions : float type - accuracy
+    return np.array([f1, f2], dtype = np.float)
+
+# this computes the Jacobian of the function 'f'
+# allows extra parameters to be passed
+def Jacobian(t, x, **params):
+
+    # machine epsilon : step size
+    h = 1e-10
+
+    # define number of rows : assuming each function has a single output
+    f0 = f(t, x, **params)
+    rows = len(f0)
+
+    # define number of columns : vector of variables
+    cols = len(x)
+
+    # preallocate the Jacobian matrix for speed
+    J = np.zeros([rows, cols], dtype = np.float)
+
+    for i in range(len(x)):
+
+        # split into two vectors
+        x1 = x.copy()
+        x2 = x.copy()
+
+        # forward difference
+        x1[i] += h
+        f1 = f(t, x1, **params)
+
+        # backward difference
+        x2[i] -= h
+        f2 = f(t, x2, **params)
+
+        # combine for central difference
+        J[:, i] = (f1 - f2) / (2 * h)
+
+    # return Jacobian matrix
+    return J
+
+# must define at a specific time
+t = 0
+
+# these are initial values or x0
+x0 = np.array([2, 1], dtype = np.float)
+
+print(Jacobian(t, x0, a = 1, b = 1))
